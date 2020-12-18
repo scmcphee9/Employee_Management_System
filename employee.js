@@ -1,5 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql");
+const cTable = require("console.table");
 
 //ascii art
 // const logo = require('asciiart-logo');
@@ -69,14 +70,130 @@ const viewDepartments = () => {
   connection.query("SELECT * FROM department", (err, res) => {
     if (err) throw err;
 
-    return console.log(res);
+    console.table(res);
+    init();
   });
-  init();
 };
 
-const viewRoles = () => {};
-const viewEmployees = () => {};
-const addDepartment = () => {};
-const addRole = () => {};
-const addEmployee = () => {};
-const updateEmployee = () => {};
+const viewRoles = () => {
+  connection.query("SELECT * FROM role", (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    init();
+  });
+};
+const viewEmployees = () => {
+  connection.query("SELECT * FROM employee", (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    init();
+  });
+};
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What department do you want to add?",
+        name: "name",
+      },
+    ])
+    .then(({ name }) => {
+      connection.query("INSERT INTO department SET ?", { name }, (err) => {
+        if (err) throw err;
+        console.log(`Department added: ${name}`);
+        init();
+      });
+    });
+};
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What role would you like to add?",
+        // choices: ["Manager", "Intern", "Lawyer", "Salesman",],
+        name: "title",
+      },
+      {
+        type: "input",
+        message: "What is their salary?",
+        name: "salary",
+      },
+      {
+        type: "input",
+        message: "What is the department ID?",
+        name: "department_id",
+      },
+    ])
+    .then(({ title, salary, department_id }) => {
+      connection.query(
+        "INSERT INTO role SET ?",
+        { title, salary, department_id },
+        (err) => {
+          if (err) throw err;
+          console.log(`Role added: ${title}`);
+          // department id use a join?
+          init();
+        }
+      );
+    });
+};
+
+const addEmployee = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the employees first name?",
+        // choices: ["Manager", "Intern", "Lawyer", "Salesman",],
+        name: "first_name",
+      },
+      {
+        type: "input",
+        message: "What is the employees last name?",
+        name: "last_name",
+      },
+      {
+        type: "input",
+        message: "What is the employees role ID?",
+        name: "role_id",
+      },
+      {
+        type: "input",
+        message: "What is the employees manager ID?",
+        name: "manager_id",
+      },
+    ])
+    .then(({ first_name, last_name, role_id, manager_id }) => {
+      connection.query(
+        "INSERT INTO employee SET ?",
+        { first_name, last_name, role_id, manager_id },
+        (err) => {
+          if (err) throw err;
+          console.log(`Employee added: ${first_name} ${last_name}`);
+          // role and manager id use joins?
+          init();
+        }
+      );
+    });
+};
+
+const updateEmployee = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "Which employee do you wante to update?",
+        name: "update_employee",
+      },
+    ])
+    .then(({ update_employee }) => {
+      //select with update employee, how do we change? more prompts?
+      connection.query("UPDATE employee SET ? WHERE ?", [{}], (err, res) => {
+        if (err) throw err;
+      });
+    });
+};
