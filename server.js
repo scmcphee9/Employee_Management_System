@@ -182,18 +182,50 @@ const addEmployee = () => {
 };
 
 const updateEmployee = () => {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        message: "Which employee do you wante to update?",
-        name: "update_employee",
-      },
-    ])
-    .then(({ update_employee }) => {
-      //select with update employee, how do we change? more prompts?
-      connection.query("UPDATE employee SET ? WHERE ?", [{}], (err, res) => {
-        if (err) throw err;
-      });
+  connection.query("SELECT * FROM employee", (err, data) => {
+    // console.log(data);
+
+    // const firstName = data.first_name;
+    // const lastName = data.last_name;
+
+    const names = [];
+
+    data.forEach((employee) => {
+      names.push([employee.first_name, employee.last_name].join(" "));
     });
+    console.log(names);
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Which employee do you wante to update?",
+          choices: names,
+          name: "update_employee",
+        },
+      ])
+      .then();
+  });
+
+  //change function prompts for changing employee data
+
+  // console.log(employee);
+
+  // const employee = viewEmployees();
+
+  // console.log(employee);
+  // inquirer
+  //   .prompt([
+  //     {
+  //       type: "list",
+  //       message: "Which employee do you wante to update?",
+  //       choices: [],
+  //       name: "update_employee",
+  //     },
+  //   ])
+  //   .then(({ update_employee }) => {
+  //     //select with update employee, how do we change? more prompts?
+  //     connection.query("UPDATE employee SET ? WHERE ?", [{}], (err, res) => {
+  //       if (err) throw err;
+  //     });
+  //   });
 };
