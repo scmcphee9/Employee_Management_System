@@ -3,9 +3,19 @@ const mysql = require("mysql");
 const cTable = require("console.table");
 
 //ascii art
-// const logo = require('asciiart-logo');
-// const config = require('./package.json');
-// console.log(logo(config).render())
+const logo = require("asciiart-logo");
+const config = require("./package.json");
+console.log(
+  logo({
+    name: "Employee Manager",
+    font: "ANSI Shadow",
+    lineChars: 10,
+    padding: 2,
+    margin: 3,
+    borderColor: "grey",
+    logoColor: "bold-green",
+  }).render()
+);
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -76,20 +86,26 @@ const viewDepartments = () => {
 };
 
 const viewRoles = () => {
-  connection.query("SELECT * FROM role", (err, res) => {
-    if (err) throw err;
+  connection.query(
+    "SELECT roles.id, roles.title, roles.salary, department.deptname  FROM roles LEFT JOIN department ON roles.department_id = department.id;",
+    (err, res) => {
+      if (err) throw err;
 
-    console.table(res);
-    init();
-  });
+      console.table(res);
+      init();
+    }
+  );
 };
 const viewEmployees = () => {
-  connection.query("SELECT * FROM employee", (err, res) => {
-    if (err) throw err;
+  connection.query(
+    "SELECT employee.id, employee.first_name,  employee.last_name, department.deptname, roles.title, roles.salary FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN department ON roles.department_id = department.id",
+    (err, res) => {
+      if (err) throw err;
 
-    console.table(res);
-    init();
-  });
+      console.table(res);
+      init();
+    }
+  );
 };
 const addDepartment = () => {
   inquirer
@@ -148,7 +164,6 @@ const addEmployee = () => {
       {
         type: "input",
         message: "What is the employees first name?",
-        // choices: ["Manager", "Intern", "Lawyer", "Salesman",],
         name: "first_name",
       },
       {
@@ -181,7 +196,7 @@ const addEmployee = () => {
     });
 };
 
-const updateEmployee = () => {
+const updateEmployeeRole = () => {
   connection.query("SELECT * FROM employee", (err, data) => {
     // console.log(data);
 
@@ -198,14 +213,21 @@ const updateEmployee = () => {
       .prompt([
         {
           type: "list",
-          message: "Which employee do you wante to update?",
+          message: "Which employee role do you want to update?",
           choices: names,
-          name: "update_employee",
+          name: "update_employee_role",
         },
       ])
       .then();
   });
 
+  // return roles to choose from
+
+  const employeeUpdateQs = () => {
+    // update employee set roles set title
+    // update role SET update employee role where ID
+    // change role id number in employee
+  };
   //change function prompts for changing employee data
 
   // console.log(employee);
