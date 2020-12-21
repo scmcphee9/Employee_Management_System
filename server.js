@@ -17,6 +17,7 @@ console.log(
   }).render()
 );
 
+// mysql connection and database connected to
 const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
@@ -25,12 +26,14 @@ const connection = mysql.createConnection({
   database: "employeeDB",
 });
 
+// mysql connection information
 connection.connect((err) => {
   if (err) throw err;
   console.log(`Connected at ${connection.threadId}`);
   init();
 });
 
+// starts the application
 const init = () => {
   inquirer
     .prompt({
@@ -70,10 +73,7 @@ const init = () => {
     });
 };
 
-// allemplyoee function - query database and return data - left join
-
-// all employee by department - prompt engineering, finance, legal, sales. connection.query
-
+// views all departments
 const viewDepartments = () => {
   // inquirer.prompt([{}])
   // console.log("Departments");
@@ -84,7 +84,7 @@ const viewDepartments = () => {
     init();
   });
 };
-
+// views all the roles
 const viewRoles = () => {
   connection.query(
     "SELECT roles.id, roles.title, roles.salary, department.deptname  FROM roles LEFT JOIN department ON roles.department_id = department.id;",
@@ -96,6 +96,7 @@ const viewRoles = () => {
     }
   );
 };
+// views all the employees
 const viewEmployees = () => {
   connection.query(
     "SELECT employee.id, employee.first_name,  employee.last_name, department.deptname, roles.title, roles.salary FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN department ON roles.department_id = department.id",
@@ -107,6 +108,7 @@ const viewEmployees = () => {
     }
   );
 };
+// adds a department
 const addDepartment = () => {
   inquirer
     .prompt([
@@ -124,6 +126,7 @@ const addDepartment = () => {
       });
     });
 };
+// adds a role
 const addRole = () => {
   inquirer
     .prompt([
@@ -157,7 +160,7 @@ const addRole = () => {
       );
     });
 };
-
+// adds employee
 const addEmployee = () => {
   inquirer
     .prompt([
@@ -195,7 +198,7 @@ const addEmployee = () => {
       );
     });
 };
-
+// updates an employee role(not currently working properly)
 const updateEmployeeRole = () => {
   let roles;
   let names;
@@ -235,21 +238,22 @@ const updateEmployeeRole = () => {
           },
         ])
         .then(({ employeeSelector, roleSelector }) => {
+          // changes name to an array to use to select employee
           let empName = employeeSelector.split(" ");
 
           // let employeeIDSelector;
 
-          connection.query(
-            "SELECT id FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
-            [empName[0], empName[1]],
-            (err, res) => {
-              if (err) throw err;
+          // const employeeIdSelector = connection.query(
+          //   "SELECT id FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
+          //   [empName[0], empName[1]],
+          //   (err, res) => {
+          //     if (err) throw err;
 
-              console.log(res);
-            }
-          );
+          //     console.log(res);
+          //   }
+          // );
           // console.log(employeeIDSelector);
-          connection.query(
+          const rolesIdSelector = connection.query(
             "SELECT id FROM roles WHERE roles.title = ?",
             roleSelector,
             (err, res) => {
@@ -261,46 +265,28 @@ const updateEmployeeRole = () => {
 
           // console.log(employeeIDSelector);
           // console.log(roleSelector);
+          // const query = connection.query(
+          //   "UPDATE employee SET role_id = ? WHERE id = ?",
+          //   [roleSelector, employeeSelector],
+          //   (err, res) => {
+          //     if (err) throw err;
+          //     console.log(`${res.affectedRows} employees updated \n`);
+          //   }
+          // );
+
           const query = connection.query(
-            "UPDATE employee SET role_id = ? WHERE id = ?",
-            [roleSelector, employeeSelector],
+            "UPDATE employee SET role_id = ? WHERE (first_name = ? AND last_name = ?)",
+            [rolesIdSelector, empName[0], empName[1]],
             (err, res) => {
               if (err) throw err;
               console.log(`${res.affectedRows} employees updated \n`);
             }
           );
           console.table(query.sql);
+          init();
         });
     }
   );
 
-  // return roles to choose from
-
-  // const employeeUpdateQs = () => {
-  //   // update employee set roles set title
-  //   // update role SET update employee role where ID
-  //   // change role id number in employee
-  // };
-  //change function prompts for changing employee data
-
-  // console.log(employee);
-
-  // const employee = viewEmployees();
-
-  // console.log(employee);
-  // inquirer
-  //   .prompt([
-  //     {
-  //       type: "list",
-  //       message: "Which employee do you wante to update?",
-  //       choices: [],
-  //       name: "update_employee",
-  //     },
-  //   ])
-  //   .then(({ update_employee }) => {
-  //     //select with update employee, how do we change? more prompts?
-  //     connection.query("UPDATE employee SET ? WHERE ?", [{}], (err, res) => {
-  //       if (err) throw err;
-  //     });
-  //   });
+ 
 };
