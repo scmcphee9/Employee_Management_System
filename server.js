@@ -115,13 +115,13 @@ const addDepartment = () => {
       {
         type: "input",
         message: "What department do you want to add?",
-        name: "name",
+        name: "deptname",
       },
     ])
-    .then(({ name }) => {
-      connection.query("INSERT INTO department SET ?", { name }, (err) => {
+    .then(({ deptname }) => {
+      connection.query("INSERT INTO department SET ?", { deptname }, (err) => {
         if (err) throw err;
-        console.log(`Department added: ${name}`);
+        console.log(`Department added: ${deptname}`);
         init();
       });
     });
@@ -149,7 +149,7 @@ const addRole = () => {
     ])
     .then(({ title, salary, department_id }) => {
       connection.query(
-        "INSERT INTO role SET ?",
+        "INSERT INTO roles SET ?",
         { title, salary, department_id },
         (err) => {
           if (err) throw err;
@@ -243,15 +243,15 @@ const updateEmployeeRole = () => {
 
           // let employeeIDSelector;
 
-          // const employeeIdSelector = connection.query(
-          //   "SELECT id FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
-          //   [empName[0], empName[1]],
-          //   (err, res) => {
-          //     if (err) throw err;
+          const employeeIdSelector = connection.query(
+            "SELECT id FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
+            [empName[0], empName[1]],
+            (err, res) => {
+              if (err) throw err;
 
-          //     console.log(res);
-          //   }
-          // );
+              console.log(res);
+            }
+          );
           // console.log(employeeIDSelector);
           const rolesIdSelector = connection.query(
             "SELECT id FROM roles WHERE roles.title = ?",
@@ -287,6 +287,4 @@ const updateEmployeeRole = () => {
         });
     }
   );
-
- 
 };
