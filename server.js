@@ -63,7 +63,7 @@ const init = () => {
         case "Add employee":
           return addEmployee();
         case "Update employee roles":
-          return updateEmployee();
+          return updateEmployeeRole();
         case "Quit":
           connection.end();
       }
@@ -197,37 +197,90 @@ const addEmployee = () => {
 };
 
 const updateEmployeeRole = () => {
-  connection.query("SELECT * FROM employee", (err, data) => {
-    // console.log(data);
+  let roles;
+  let names;
 
-    // const firstName = data.first_name;
-    // const lastName = data.last_name;
+  connection.query(
+    "SELECT employee.id, employee.first_name,  employee.last_name, roles.title, roles.id FROM employee LEFT JOIN roles ON employee.role_id = roles.id ",
+    (err, data) => {
+      names = [];
+      roles = [];
 
-    const names = [];
+      data.forEach((employee) => {
+        names.push([employee.first_name, employee.last_name].join(" "));
+      });
 
-    data.forEach((employee) => {
-      names.push([employee.first_name, employee.last_name].join(" "));
-    });
-    console.log(names);
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          message: "Which employee role do you want to update?",
-          choices: names,
-          name: "update_employee_role",
-        },
-      ])
-      .then();
-  });
+      data.forEach((role) => {
+        roles.push(role.title);
+      });
+
+      // console.log(roles);
+      // data.forEach((roleID) => {
+      //   rolesID.push(roleID.id);
+      // });
+
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            message: "Which employee role do you want to update?",
+            choices: names,
+            name: "employeeSelector",
+          },
+          {
+            type: "list",
+            message: "Which role do you want to change it to?",
+            choices: roles,
+            name: "roleSelector",
+          },
+        ])
+        .then(({ employeeSelector, roleSelector }) => {
+          let empName = employeeSelector.split(" ");
+
+          // let employeeIDSelector;
+
+          connection.query(
+            "SELECT id FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
+            [empName[0], empName[1]],
+            (err, res) => {
+              if (err) throw err;
+
+              console.log(res);
+            }
+          );
+          // console.log(employeeIDSelector);
+          connection.query(
+            "SELECT id FROM roles WHERE roles.title = ?",
+            roleSelector,
+            (err, res) => {
+              if (err) throw err;
+
+              console.log(res);
+            }
+          );
+
+          // console.log(employeeIDSelector);
+          // console.log(roleSelector);
+          const query = connection.query(
+            "UPDATE employee SET role_id = ? WHERE id = ?",
+            [roleSelector, employeeSelector],
+            (err, res) => {
+              if (err) throw err;
+              console.log(`${res.affectedRows} employees updated \n`);
+            }
+          );
+          console.table(query.sql);
+        });
+    }
+  );
 
   // return roles to choose from
 
-  const employeeUpdateQs = () => {
-    // update employee set roles set title
-    // update role SET update employee role where ID
-    // change role id number in employee
-  };
+  // const employeeUpdateQs = () => {
+  //   // update employee set roles set title
+  //   // update role SET update employee role where ID
+  //   // change role id number in employee
+  // };
   //change function prompts for changing employee data
 
   // console.log(employee);
