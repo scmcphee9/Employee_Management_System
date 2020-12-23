@@ -199,25 +199,28 @@ const addEmployee = () => {
     });
 };
 // updates an employee role(not currently working properly)
-const updateEmployeeRole = () => {
+const updateEmployeeRole = async () => {
   let roles;
   let names;
 
-  connection.query(
+  const allinfo = await connection.query(
     "SELECT employee.id, employee.first_name,  employee.last_name, roles.title, roles.id FROM employee LEFT JOIN roles ON employee.role_id = roles.id ",
     (err, data) => {
       names = [];
       roles = [];
 
       data.forEach((employee) => {
-        names.push([employee.first_name, employee.last_name].join(" "));
+        names.push({
+          value: employee.id,
+          name: [employee.first_name, employee.last_name].join(" "),
+        });
       });
 
       data.forEach((role) => {
-        roles.push(role.title);
+        roles.push({ value: role.id, name: role.title });
       });
 
-      // console.log(roles);
+      console.log(roles);
       // data.forEach((roleID) => {
       //   rolesID.push(roleID.id);
       // });
@@ -239,49 +242,54 @@ const updateEmployeeRole = () => {
         ])
         .then(({ employeeSelector, roleSelector }) => {
           // changes name to an array to use to select employee
-          let empName = employeeSelector.split(" ");
+          // let empName = employeeSelector.split(" ");
+
+          console.log(employeeSelector);
+          console.log(roleSelector);
 
           // let employeeIDSelector;
 
-          const employeeIdSelector = connection.query(
-            "SELECT id FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
-            [empName[0], empName[1]],
-            (err, res) => {
-              if (err) throw err;
-
-              console.log(res);
-            }
-          );
-          // console.log(employeeIDSelector);
-          const rolesIdSelector = connection.query(
-            "SELECT id FROM roles WHERE roles.title = ?",
-            roleSelector,
-            (err, res) => {
-              if (err) throw err;
-
-              console.log(res);
-            }
-          );
-
-          // console.log(employeeIDSelector);
-          // console.log(roleSelector);
-          // const query = connection.query(
-          //   "UPDATE employee SET role_id = ? WHERE id = ?",
-          //   [roleSelector, employeeSelector],
+          // const employeeIdSelector = connection.query(
+          //   "SELECT * FROM employee WHERE (employee.first_name = ? AND employee.last_name = ?) ",
+          //   [empName[0], empName[1]],
           //   (err, res) => {
           //     if (err) throw err;
-          //     console.log(`${res.affectedRows} employees updated \n`);
+
+          //     return res;
+          //   }
+          // );
+          // .then((identifier) => console.log(identifier));
+          // console.log(employeeIDSelector);
+          // const rolesIdSelector = connection.query(
+          //   "SELECT * FROM roles WHERE roles.title = ?",
+          //   roleSelector,
+          //   (err, res) => {
+          //     if (err) throw err;
+
+          //     console.log(res);
           //   }
           // );
 
+          // console.log(employeeIdSelector);
+          // console.log(rolesIdSelector);
+
           const query = connection.query(
-            "UPDATE employee SET role_id = ? WHERE (first_name = ? AND last_name = ?)",
-            [rolesIdSelector, empName[0], empName[1]],
+            "UPDATE employee SET role_id = ? WHERE id = ?",
+            [roleSelector, employeeSelector],
             (err, res) => {
               if (err) throw err;
               console.log(`${res.affectedRows} employees updated \n`);
             }
           );
+
+          // const query = connection.query(
+          //   "UPDATE employee SET role_id = ? WHERE (first_name = ? AND last_name = ?)",
+          //   [rolesIdSelector, empName[0], empName[1]],
+          //   (err, res) => {
+          //     if (err) throw err;
+          //     console.log(`${res.affectedRows} employees updated \n`);
+          //   }
+          // );
           console.table(query.sql);
           init();
         });
